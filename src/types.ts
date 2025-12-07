@@ -14,12 +14,13 @@ export interface UmamiEvent {
   title: string;
   url: string;
   website: string;
-  name?: string;
+  name?: string;  // Maps to eventName in options, 'name' is required by Umami API
   data?: Record<string, any>;
 }
 
 export interface TrackEventOptions {
-  name?: string;
+  title?: string;
+  eventName?: string;
   data?: Record<string, any>;
 }
 

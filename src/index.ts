@@ -1,31 +1,13 @@
-import { UmamiClient } from './umami-client';
-import { UmamiConfig, TrackEventOptions } from './types';
+import { TrackEventOptions, UmamiConfig } from "./types";
+import { UmamiClient } from "./umami-client";
 
-export { UmamiConfig, TrackEventOptions } from './types';
+export { TrackEventOptions, UmamiConfig } from "./types";
+
+// Initialization
 
 export async function initUmami(config?: UmamiConfig): Promise<void> {
   const client = UmamiClient.getInstance();
   await client.init(config);
-}
-
-export async function trackEvent(
-  screenName: string,
-  options?: TrackEventOptions
-): Promise<void> {
-  const client = UmamiClient.getInstance();
-  await client.trackEvent(screenName, options);
-}
-
-export async function trackScreenView(
-  screenName: string,
-  options?: TrackEventOptions
-): Promise<void> {
-  return trackEvent(screenName, options);
-}
-
-export async function flush(): Promise<void> {
-  const client = UmamiClient.getInstance();
-  await client.flush();
 }
 
 export function isInitialized(): boolean {
@@ -33,41 +15,53 @@ export function isInitialized(): boolean {
   return client.isInitialized();
 }
 
+// Queue handling
+
+export async function flush(): Promise<void> {
+  const client = UmamiClient.getInstance();
+  await client.flush();
+}
+
 export function getQueueSize(): number {
   const client = UmamiClient.getInstance();
   return client.getQueueSize();
 }
 
-export async function trackClick(
-  elementName: string,
-  options?: Omit<TrackEventOptions, 'name'>
-): Promise<void> {
+// Event tracking
+
+export async function trackEvent(screenName: string, options?: TrackEventOptions): Promise<void> {
+  const client = UmamiClient.getInstance();
+  await client.trackEvent(screenName, options);
+}
+
+export async function trackScreenView(screenName: string, options?: TrackEventOptions): Promise<void> {
+  return trackEvent(screenName, options);
+}
+
+export async function trackClick(elementName: string, options?: Omit<TrackEventOptions, "eventName">): Promise<void> {
   const client = UmamiClient.getInstance();
   await client.trackEvent(elementName, {
     ...options,
-    name: 'click',
+    eventName: "click",
   });
 }
 
-export async function trackImpression(
-  elementName: string,
-  options?: Omit<TrackEventOptions, 'name'>
-): Promise<void> {
+export async function trackImpression(elementName: string, options?: Omit<TrackEventOptions, "eventName">): Promise<void> {
   const client = UmamiClient.getInstance();
   await client.trackEvent(elementName, {
     ...options,
-    name: 'impression',
+    eventName: "impression",
   });
 }
 
 export async function trackCustomEvent(
-  screenName: string,
+  url: string,
   eventName: string,
-  options?: Omit<TrackEventOptions, 'name'>
+  options?: Omit<TrackEventOptions, "eventName">
 ): Promise<void> {
   const client = UmamiClient.getInstance();
-  await client.trackEvent(screenName, {
+  await client.trackEvent(url, {
     ...options,
-    name: eventName,
+    eventName: eventName,
   });
 }

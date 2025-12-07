@@ -33,10 +33,5 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
   },
 }));
 
-// Mock change-case to avoid any parsing issues
-vi.mock('change-case', () => ({
-  kebabCase: vi.fn((str: string) => str.toLowerCase().replace(/\s+/g, '-')),
-}));
-
 // Mock fetch
 global.fetch = vi.fn();

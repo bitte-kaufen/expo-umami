@@ -2,7 +2,6 @@ import { AppState, AppStateStatus, Dimensions, Platform } from 'react-native';
 import * as Application from 'expo-application';
 import * as Localization from 'expo-localization';
 import Constants from 'expo-constants';
-import { kebabCase } from 'change-case';
 import { UmamiConfig, UmamiEvent, TrackEventOptions } from './types';
 import { EventQueue } from './event-queue';
 
@@ -78,15 +77,13 @@ export class UmamiClient {
     }
   }
 
-  async trackEvent(screenName: string, options: TrackEventOptions = {}): Promise<void> {
+  async trackEvent(url: string, options: TrackEventOptions = {}): Promise<void> {
     if (!this.config || !this.eventQueue) {
       throw new Error('[expo-umami] Client not initialized. Call init() first.');
     }
 
-    const cleanScreenName = screenName.replace(/Screen/g, '');
-    const urlFragments = cleanScreenName
-      .split('/')
-      .map((fragment) => kebabCase(fragment));
+    // Ensure URL starts with /
+    const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
 
     const { width, height } = Dimensions.get('window');
     const locale = Localization.getLocales()[0]?.languageTag || 'en-US';
@@ -95,14 +92,14 @@ export class UmamiClient {
       hostname: Application.applicationId ?? 'unknown.app',
       language: locale,
       screen: `${width}x${height}`,
-      title: cleanScreenName,
-      url: `/${urlFragments.join('/')}`,
+      title: options.title || url,
+      url: normalizedUrl,
       website: this.config.websiteId,
-      ...(options.name && { name: options.name }),
+      ...(options.eventName ? { name: options.eventName } : {}),
       data: options.data || {},
     };
 
-    this.log(`Tracking event: ${cleanScreenName}${options.name ? ` (${options.name})` : ''}`, payload);
+    this.log(`Tracking event: ${url}${options.eventName ? ` (${options.eventName})` : ''}`, payload);
 
     await this.eventQueue.enqueue(payload);
   }

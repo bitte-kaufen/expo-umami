@@ -77,6 +77,14 @@ useEffect(() => {
 
 ## Usage
 
+> **💡 Best Practice: Use Web-Style URLs**
+> 
+> When tracking screens, use web-style URL paths (e.g., `/home`, `/product/details`) instead of component names (e.g., `HomeScreen`, `ProductDetailsScreen`). This:
+> - Makes analytics data consistent with web applications
+> - Provides cleaner, more readable URLs in Umami dashboard
+> - Allows for hierarchical organization (`/settings/profile`, `/settings/notifications`)
+> - Example: Use `/overview` instead of `OverviewScreen`
+
 ### Track Screen Views
 
 ```typescript
@@ -84,7 +92,7 @@ import { trackEvent, trackScreenView } from '@bitte-kaufen/expo-umami';
 
 function HomeScreen() {
   useEffect(() => {
-    trackScreenView('Home');
+    trackScreenView('/home', { title: 'Home Screen' });
   }, []);
 
   return <View>...</View>;
@@ -98,7 +106,8 @@ import { trackEvent } from '@bitte-kaufen/expo-umami';
 
 function ProductScreen() {
   const handlePurchase = () => {
-    trackEvent('Product/Purchase', {
+    trackEvent('/product/purchase', {
+      title: 'Product Purchase',
       data: {
         productId: '123',
         price: 29.99,
@@ -119,21 +128,24 @@ import { trackClick, trackImpression, trackCustomEvent } from '@bitte-kaufen/exp
 function ProductCard({ product }) {
   useEffect(() => {
     // Track when product card is viewed
-    trackImpression('Product/Card', {
+    trackImpression('/product/card', {
+      title: 'Product Card',
       data: { productId: product.id, price: product.price },
     });
   }, [product]);
 
   const handleAddToCart = () => {
     // Track button click
-    trackClick('Product/AddToCart', {
+    trackClick('/product/add-to-cart', {
+      title: 'Add to Cart Button',
       data: { productId: product.id },
     });
   };
 
   const handleShare = () => {
     // Track custom event with any name
-    trackCustomEvent('Product/Card', 'share', {
+    trackCustomEvent('/product/card', 'share', {
+      title: 'Product Card',
       data: { productId: product.id, method: 'social' },
     });
   };
@@ -149,11 +161,12 @@ function ProductCard({ product }) {
 
 ### Advanced: Custom Event Names
 
-You can also pass a custom event name to `trackEvent`:
+You can also pass a custom event name and title to `trackEvent`:
 
 ```typescript
-trackEvent('Home/Hero', {
-  name: 'banner_interaction',
+trackEvent('/home/hero', {
+  title: 'Home Hero Banner',
+  eventName: 'banner_interaction',
   data: { position: 'top', action: 'swipe' },
 });
 ```
@@ -196,18 +209,21 @@ console.log('Queued events:', getQueueSize());
    - App goes to background/inactive state
 3. **Batch API**: Uses Umami's `/api/batch` endpoint for efficient bulk sending
 4. **Offline Support**: When enabled, events persist to AsyncStorage and survive app restarts
-5. **Auto Formatting**: Automatically formats screen names and generates proper URLs
+5. **URL Normalization**: Automatically ensures URLs start with `/` for consistency
 
 ## Event Formatting
 
-Screen names are automatically transformed:
+URLs are used as-is with minimal normalization:
 
 ```typescript
-trackEvent('Home/ProductList');
-// Sends: url = '/home/product-list', title = 'Home/ProductList'
+trackEvent('/home/product-list');
+// Sends: url = '/home/product-list', title = '/home/product-list'
 
-trackEvent('SettingsScreen');
-// Sends: url = '/settings', title = 'Settings' (removes 'Screen' suffix)
+trackEvent('/settings', { title: 'Settings Screen' });
+// Sends: url = '/settings', title = 'Settings Screen'
+
+trackEvent('home');
+// Sends: url = '/home', title = 'home' (automatically adds leading /)
 ```
 
 ## API Reference
@@ -216,13 +232,14 @@ trackEvent('SettingsScreen');
 
 Initialize the Umami client. Can be called without parameters if using config plugin.
 
-### `trackEvent(screenName: string, options?: TrackEventOptions): Promise<void>`
+### `trackEvent(url: string, options?: TrackEventOptions): Promise<void>`
 
 Track a screen view or event. Options include:
-- `name?: string` - Custom event name (makes it a custom event instead of pageview)
+- `title?: string` - Custom title for the event (defaults to url)
+- `eventName?: string` - Custom event name (makes it a custom event instead of pageview)
 - `data?: Record<string, any>` - Custom event data
 
-### `trackScreenView(screenName: string, options?: TrackEventOptions): Promise<void>`
+### `trackScreenView(url: string, options?: TrackEventOptions): Promise<void>`
 
 Alias for `trackEvent`. Use whichever reads better in your code.
 
@@ -234,7 +251,7 @@ Track a click event. Automatically sets event name to 'click'.
 
 Track an impression event. Automatically sets event name to 'impression'.
 
-### `trackCustomEvent(screenName: string, eventName: string, options?: TrackEventOptions): Promise<void>`
+### `trackCustomEvent(url: string, eventName: string, options?: TrackEventOptions): Promise<void>`
 
 Track a custom event with a specific event name.
 
@@ -273,7 +290,7 @@ import { trackScreenView } from '@bitte-kaufen/expo-umami';
 
 export default function HomeScreen() {
   useEffect(() => {
-    trackScreenView('Home');
+    trackScreenView('/home', { title: 'Home Screen' });
   }, []);
 
   return (
@@ -302,12 +319,13 @@ umami.track({
 
 **After:**
 ```typescript
-trackEvent('MyPage', {
+trackEvent('/my-page', {
+  title: 'My Page',
   data: { foo: 'bar' },
 });
 ```
 
-All the boilerplate (hostname, language, screen size, URL formatting) is handled automatically.
+All the boilerplate (hostname, language, screen size) is handled automatically.
 
 ## License
 
