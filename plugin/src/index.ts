@@ -1,2 +1,1 @@
-export { default } from './with-umami';
-export { UmamiPluginProps } from './with-umami';
+export { default, UmamiPluginProps } from './with-umami';
