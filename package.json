@@ -1,6 +1,6 @@
 {
   "name": "@bitte-kaufen/expo-umami",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Umami analytics integration for Expo apps with batching and offline support",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
