@@ -1,0 +1,17 @@
+documentation:
+  - "docs/**/*"
+  - "**/*.md"
+
+tests:
+  - "src/__tests__/**/*"
+  - "**/*.test.ts"
+
+dependencies:
+  - "package.json"
+  - "yarn.lock"
+
+ci:
+  - ".github/**/*"
+
+plugin:
+  - "plugin/**/*"

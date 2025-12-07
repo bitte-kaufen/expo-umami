@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "My Expo App",
+    "slug": "my-expo-app",
+    "version": "1.0.0",
+    "plugins": [
+      [
+        "@expo-community/expo-umami",
+        {
+          "websiteId": "your-website-id-here",
+          "hostUrl": "https://analytics.example.com",
+          "batchSize": 10,
+          "batchInterval": 30000,
+          "persistEvents": true,
+          "debug": false
+        }
+      ]
+    ]
+  }
+}
