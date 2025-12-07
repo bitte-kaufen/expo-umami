@@ -1,19 +1,6 @@
 import { vi } from 'vitest';
 
-// Mock React Native modules
-vi.mock('react-native', () => ({
-  Platform: {
-    OS: 'ios',
-    select: vi.fn((obj) => obj.ios),
-  },
-  Dimensions: {
-    get: vi.fn(() => ({ width: 390, height: 844 })),
-  },
-  AppState: {
-    addEventListener: vi.fn(() => ({ remove: vi.fn() })),
-    currentState: 'active',
-  },
-}));
+// React Native is aliased in vitest.config.ts to use our mock
 
 // Mock Expo modules
 vi.mock('expo-application', () => ({

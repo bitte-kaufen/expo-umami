@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   test: {
@@ -9,6 +10,11 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: ['build/**', 'node_modules/**', '**/*.d.ts', '**/__tests__/**'],
+    },
+  },
+  resolve: {
+    alias: {
+      'react-native': path.resolve(__dirname, './src/__mocks__/react-native.ts'),
     },
   },
 });
