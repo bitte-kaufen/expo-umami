@@ -4,12 +4,14 @@ import { vi } from 'vitest';
 vi.mock('react-native', () => ({
   Platform: {
     OS: 'ios',
+    select: vi.fn((obj) => obj.ios),
   },
   Dimensions: {
     get: vi.fn(() => ({ width: 390, height: 844 })),
   },
   AppState: {
     addEventListener: vi.fn(() => ({ remove: vi.fn() })),
+    currentState: 'active',
   },
 }));
 
@@ -42,6 +44,11 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
     setItem: vi.fn(async () => {}),
     removeItem: vi.fn(async () => {}),
   },
+}));
+
+// Mock change-case to avoid any parsing issues
+vi.mock('change-case', () => ({
+  kebabCase: vi.fn((str: string) => str.toLowerCase().replace(/\s+/g, '-')),
 }));
 
 // Mock fetch
