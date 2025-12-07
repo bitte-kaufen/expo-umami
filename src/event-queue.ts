@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueuedEvent, UmamiEvent, BatchResponse } from './types';
+import { buildUserAgent } from './user-agent';
 
 const STORAGE_KEY = '@expo-umami/event-queue';
 
@@ -13,6 +14,7 @@ export class EventQueue {
   private hostUrl: string;
   private websiteId: string;
   private isFlushing = false;
+  private userAgent: string;
 
   constructor(
     hostUrl: string,
@@ -28,6 +30,7 @@ export class EventQueue {
     this.batchInterval = batchInterval;
     this.persistEvents = persistEvents;
     this.debug = debug;
+    this.userAgent = buildUserAgent();
   }
 
   async init(): Promise<void> {
@@ -115,14 +118,22 @@ export class EventQueue {
   private async sendBatch(events: UmamiEvent[]): Promise<BatchResponse> {
     const url = `${this.hostUrl}/api/batch`;
 
-    this.log(`Sending batch to ${url}`, events);
+    // Wrap each event in the format expected by Umami's batch API
+    // Each event needs 'type' (always 'event' for tracking) and 'payload' with the event data
+    const batchPayload = events.map((event) => ({
+      type: 'event' as const,
+      payload: event,
+    }));
+
+    this.log(`Sending batch to ${url}`, batchPayload);
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'User-Agent': this.userAgent,
       },
-      body: JSON.stringify(events),
+      body: JSON.stringify(batchPayload),
     });
 
     if (!response.ok) {

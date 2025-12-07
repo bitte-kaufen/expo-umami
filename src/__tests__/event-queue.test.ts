@@ -74,7 +74,10 @@ describe('EventQueue', () => {
       `${mockHostUrl}/api/batch`,
       expect.objectContaining({
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+          'User-Agent': expect.stringContaining('Mozilla'),
+        }),
       })
     );
   });
@@ -129,6 +132,52 @@ describe('EventQueue', () => {
     const fetchCall = (global.fetch as any).mock.calls[0];
     const body = JSON.parse(fetchCall[1].body);
 
-    expect(body[0].website).toBe(mockWebsiteId);
+    // Verify batch format: array of {type, payload} objects
+    expect(Array.isArray(body)).toBe(true);
+    expect(body[0]).toHaveProperty('type', 'event');
+    expect(body[0]).toHaveProperty('payload');
+    expect(body[0].payload.website).toBe(mockWebsiteId);
+  });
+
+  it('should send events in correct batch format', async () => {
+    queue = new EventQueue(mockHostUrl, mockWebsiteId, 10);
+    await queue.init();
+
+    const event: UmamiEvent = {
+      hostname: 'com.test.app',
+      language: 'en-US',
+      screen: '390x844',
+      title: 'Test',
+      url: '/test',
+      website: mockWebsiteId,
+      data: { custom: 'value' },
+    };
+
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ size: 1, processed: 1, errors: 0 }),
+    });
+
+    await queue.enqueue(event);
+    await queue.flush();
+
+    const fetchCall = (global.fetch as any).mock.calls[0];
+    const body = JSON.parse(fetchCall[1].body);
+
+    // Verify correct Umami batch API format
+    expect(body).toEqual([
+      {
+        type: 'event',
+        payload: expect.objectContaining({
+          hostname: 'com.test.app',
+          language: 'en-US',
+          screen: '390x844',
+          title: 'Test',
+          url: '/test',
+          website: mockWebsiteId,
+          data: { custom: 'value' },
+        }),
+      },
+    ]);
   });
 });

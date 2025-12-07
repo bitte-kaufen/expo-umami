@@ -5,18 +5,14 @@ import Constants from 'expo-constants';
 import { kebabCase } from 'change-case';
 import { UmamiConfig, UmamiEvent, TrackEventOptions } from './types';
 import { EventQueue } from './event-queue';
-import { buildUserAgent } from './user-agent';
 
 export class UmamiClient {
   private static instance: UmamiClient | null = null;
   private config: UmamiConfig | null = null;
   private eventQueue: EventQueue | null = null;
   private appStateSubscription: any = null;
-  private userAgent: string;
 
-  private constructor() {
-    this.userAgent = buildUserAgent();
-  }
+  private constructor() {}
 
   static getInstance(): UmamiClient {
     if (!UmamiClient.instance) {
