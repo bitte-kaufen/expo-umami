@@ -91,7 +91,7 @@ export class UmamiClient {
     const payload: UmamiEvent = {
       hostname: Application.applicationId ?? 'unknown.app',
       language: locale,
-      screen: `${width}x${height}`,
+      screen: `${Math.round(width)}x${Math.round(height)}`,
       title: options.title || url,
       url: normalizedUrl,
       website: this.config.websiteId,

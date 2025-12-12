@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { UmamiClient } from '../umami-client';
 import type { UmamiConfig } from '../types';
+import { Dimensions } from 'react-native';
 
 describe('UmamiClient', () => {
   let client: UmamiClient;
@@ -245,6 +246,28 @@ describe('UmamiClient', () => {
       expect(payload).toHaveProperty('title');
       expect(payload).toHaveProperty('url');
       expect(payload).toHaveProperty('website', mockConfig.websiteId);
+    });
+
+    it('should round screen dimensions to integers', async () => {
+      // Mock Dimensions to return decimal values
+      const mockDimensions = vi.spyOn(Dimensions, 'get');
+      mockDimensions.mockReturnValue({ width: 390.5, height: 844.7 });
+
+      (global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: async () => ({ size: 1, processed: 1, errors: 0 }),
+      });
+
+      await client.trackEvent('/test');
+      await client.flush();
+
+      const fetchCall = (global.fetch as any).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      
+      // Screen dimensions should be rounded to integers
+      expect(body[0].payload.screen).toBe('391x845');
+      
+      mockDimensions.mockRestore();
     });
   });
 
