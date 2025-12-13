@@ -6,6 +6,7 @@ import { vi } from 'vitest';
 vi.mock('expo-application', () => ({
   applicationId: 'com.test.app',
   nativeApplicationVersion: '1.0.0',
+  applicationName: 'TestApp',
 }));
 
 vi.mock('expo-device', () => ({
@@ -20,8 +21,10 @@ vi.mock('expo-localization', () => ({
 vi.mock('expo-constants', () => ({
   default: {
     expoConfig: {
+      name: 'TestApp',
       extra: {},
     },
+    expoVersion: '52.0.0',
   },
 }));
 

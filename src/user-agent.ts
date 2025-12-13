@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Application from 'expo-application';
+import Constants from 'expo-constants';
 
 export function buildUserAgent(): string {
   const isIOS = Platform.OS === 'ios';
@@ -14,6 +15,9 @@ export function buildUserAgent(): string {
       '_'
     )} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${appVersion} Mobile/15E148 Safari/605.1.15`;
   } else {
-    return `Mozilla/5.0 (Linux; Android ${osVersion}; ${model}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${appVersion} Mobile Safari/537.36`;
+    const appName = Constants.expoConfig?.name || Application.applicationName || 'ExpoApp';
+    const expoVersion = Constants.expoVersion || 'unknown';
+    // Use app-specific format for Android to fix Chrome detection
+    return `${appName}/${appVersion} (Linux; Android ${osVersion}; ${model}) Expo/${expoVersion}`;
   }
 }

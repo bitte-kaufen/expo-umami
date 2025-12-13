@@ -76,7 +76,7 @@ describe('EventQueue', () => {
         method: 'POST',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
-          'User-Agent': expect.stringContaining('Mozilla'),
+          'User-Agent': expect.any(String),
         }),
       })
     );
